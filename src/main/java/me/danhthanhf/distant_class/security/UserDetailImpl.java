@@ -1,21 +1,33 @@
 package me.danhthanhf.distant_class.security;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import me.danhthanhf.distant_class.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+
 @Getter
 @Builder
-public class UserPrincipal implements UserDetails {
+public class UserDetailImpl implements UserDetails {
     private Long id;
     private String email;
+    @JsonIgnore
+    private String password;
     private List<String> roles;
+
+    public static UserDetailImpl buildUserDetail(User user) {
+        return UserDetailImpl.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRoles().stream().map(role -> role.getName().toString()).toList())
+                .build();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -24,7 +36,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override

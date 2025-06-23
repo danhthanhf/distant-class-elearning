@@ -1,12 +1,15 @@
 package me.danhthanhf.distant_class.exception.handler;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import me.danhthanhf.distant_class.common.constant.ErrorConstants;
 import me.danhthanhf.distant_class.common.response.ApiResponse;
+import me.danhthanhf.distant_class.exception.type.MailSendingException;
 import me.danhthanhf.distant_class.exception.type.ResourceConflictException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -59,6 +62,27 @@ public class GlobalExceptionHandler {
         var errors = getValidationErrors(ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ApiResponse.error(ErrorConstants.ERR_VALIDATION_FAILED, errors));
+    }
+
+    @ExceptionHandler(MailSendingException.class)
+    public ResponseEntity<ApiResponse<?>> handleMailSendingException(MailSendingException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    // missing or malformed request body
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorConstants.ERR_INVALID_REQUEST_BODY));
+    }
+
+
+    // Handles ExpiredJwtException, which occurs when the JWT token has expired.
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExpiredJwtException(ExpiredJwtException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorConstants.ERR_TOKEN_EXPIRED));
     }
 
     // Handles validation errors, returning them as {"field": "fieldName", "message": "error message"}.

@@ -12,7 +12,7 @@ import me.danhthanhf.distant_class.common.constant.AppConstants;
 import me.danhthanhf.distant_class.common.constant.ErrorConstants;
 import me.danhthanhf.distant_class.common.response.ApiResponseWriter;
 import me.danhthanhf.distant_class.common.util.JwtUtil;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import me.danhthanhf.distant_class.config.ApiProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,34 +20,32 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final ApiResponseWriter responseWriter;
-    private final EnableSpringDataWebSupport.SpringDataWebConfigurationImportSelector springDataWebConfigurationImportSelector;
+    private final ApiProperties apiProperties;
 
     private boolean checkIfUrlInWhiteList(String url) {
-        return AppConstants.WHITE_LIST_API.stream().anyMatch(url::startsWith);
+        return Arrays.stream(apiProperties.getWhiteList()).anyMatch(url::startsWith);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String uri = request.getRequestURI();
-        String url = request.getRequestURL().toString();
-        System.out.println("Request URL: " + url);
-        System.out.println("Request URI: " + uri);
+        String uri = request.getRequestURI(); // get the URI part of the request
 
         // ignore public APIs
-        if (checkIfUrlInWhiteList(url)) {
+        if (checkIfUrlInWhiteList(uri)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             String token = extractToken(request);
-            UserPrincipal principal = jwtUtil.extractUserPrincipal(token);
+            UserDetailImpl principal = jwtUtil.extractUserPrincipal(token);
 
             var context = SecurityContextHolder.getContext();
 

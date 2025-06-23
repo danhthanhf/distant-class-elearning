@@ -1,9 +1,13 @@
 package me.danhthanhf.distant_class.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
-public class User extends BaseEntity{
+public class User extends BaseEntity {
 
     private String email;
 
@@ -32,8 +36,15 @@ public class User extends BaseEntity{
             (name = "user_roles", joinColumns = {
                     @JoinColumn(name = "user_id", referencedColumnName = "id")},
                     inverseJoinColumns = {
-                    @JoinColumn(name = "role_id", referencedColumnName = "id")
+                            @JoinColumn(name = "role_id", referencedColumnName = "id")
                     }
             )
     private List<Role> roles;
+
+    @Column(name = "is_verified")
+    private boolean isVerified = false;
+    @Column(name = "verification_code")
+    private String verificationCode;
+    @Column(name = "verification_code_expiry")
+    private LocalDateTime verificationCodeExpiry;
 }

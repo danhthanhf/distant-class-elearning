@@ -1,10 +1,10 @@
 spring:
     application:
-                name:distant-class
+        name:distant-class
     datasource:
-            url: jdbc:mysql://localhost:3306/database_name?useSSL=false&serverTimezone=UTC
-            username: your_username
-            password: your_password
+        url: jdbc:mysql://localhost:3306/database_name?useSSL=false&serverTimezone=UTC
+        username: your_username
+        password: your_password
     jpa:
         hibernate:
             ddl-auto: update
@@ -12,3 +12,14 @@ spring:
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.MySQL8Dialect
+    mail:
+        host: smtp.example.com
+        port: 567
+        username: your-username-email
+        password: your-password
+        properties:
+            mail:
+                smtp:
+                    auth: true // require client provide authentication to connect to the SMTP server
+                    starttls:
+                        enable: true // enable TLS for secure email sending
